@@ -26,6 +26,13 @@
 #include <mutex>
 #include <string>
 
+/* Hack */
+#include <stdio.h>
+constexpr const char* str_end(const char *str) { return *str ? str_end(str + 1) : str; }
+constexpr bool str_slant(const char *str) { return *str == '/' ? true : (*str ? str_slant(str + 1) : false); }
+constexpr const char* r_slant(const char* str) { return *str == '/' ? (str + 1) : r_slant(str - 1); }
+constexpr const char* file_name(const char* str) { return str_slant(str) ? r_slant(str_end(str)) : str; }
+
 namespace cpp_redis {
 
 //! logger_iface
@@ -90,7 +97,7 @@ void error(const std::string& msg, const std::string& file, std::size_t line);
 
 //! convenience macro to log with file and line information
 #ifdef __CPP_REDIS_LOGGING_ENABLED
-#define __CPP_REDIS_LOG(level, msg) cpp_redis::level(msg, __FILE__, __LINE__);
+#define __CPP_REDIS_LOG(level, msg) cpp_redis::level(msg, file_name(__FILE__), __LINE__);
 #else
 #define __CPP_REDIS_LOG(level, msg)
 #endif /* __CPP_REDIS_LOGGING_ENABLED */

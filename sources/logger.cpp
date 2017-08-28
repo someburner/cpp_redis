@@ -41,7 +41,7 @@ void
 logger::debug(const std::string& msg, const std::string& file, std::size_t line) {
   if (m_level >= log_level::debug) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    std::cout << "[" << black << "DEBUG" << normal << "][cpp_redis][" << file << ":" << line << "] " << msg << std::endl;
+    std::cout << "[" << black << "DEBUG" << normal << "][" << file << ":" << line << "] " << msg << std::endl;
   }
 }
 
@@ -49,7 +49,7 @@ void
 logger::info(const std::string& msg, const std::string& file, std::size_t line) {
   if (m_level >= log_level::info) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    std::cout << "[" << blue << "INFO " << normal << "][cpp_redis][" << file << ":" << line << "] " << msg << std::endl;
+    std::cout << "[" << blue << "INFO " << normal << "][" << file << ":" << line << "] " << msg << std::endl;
   }
 }
 
@@ -57,7 +57,7 @@ void
 logger::warn(const std::string& msg, const std::string& file, std::size_t line) {
   if (m_level >= log_level::warn) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    std::cout << "[" << yellow << "WARN " << normal << "][cpp_redis][" << file << ":" << line << "] " << msg << std::endl;
+    std::cout << "[" << yellow << "WARN" << normal << "][" << file << ":" << line << "] " << msg << std::endl;
   }
 }
 
@@ -65,7 +65,7 @@ void
 logger::error(const std::string& msg, const std::string& file, std::size_t line) {
   if (m_level >= log_level::error) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    std::cerr << "[" << red << "ERROR" << normal << "][cpp_redis][" << file << ":" << line << "] " << msg << std::endl;
+    std::cerr << "[" << red << "ERROR" << normal << "][" << file << ":" << line << "] " << msg << std::endl;
   }
 }
 
