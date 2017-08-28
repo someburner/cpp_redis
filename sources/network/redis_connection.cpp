@@ -42,12 +42,12 @@ redis_connection::redis_connection(const std::shared_ptr<tcp_client_iface>& clie
 : m_client(client)
 , m_reply_callback(nullptr)
 , m_disconnection_handler(nullptr) {
-  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection created");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection created");
 }
 
 redis_connection::~redis_connection(void) {
   m_client->disconnect(true);
-  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection destroyed");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection destroyed");
 }
 
 void
@@ -55,7 +55,7 @@ redis_connection::connect(const std::string& host, std::size_t port,
   const disconnection_handler_t& client_disconnection_handler,
   const reply_callback_t& client_reply_callback) {
   try {
-    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection attempts to connect");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection attempts to connect");
 
     //! connect client
     m_client->connect(host, port);
@@ -65,7 +65,7 @@ redis_connection::connect(const std::string& host, std::size_t port,
     tcp_client_iface::read_request request = {__CPP_REDIS_READ_SIZE, std::bind(&redis_connection::tcp_client_receive_handler, this, std::placeholders::_1)};
     m_client->async_read(request);
 
-    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection connected");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection connected");
   }
   catch (const std::exception& e) {
     __CPP_REDIS_LOG(error, std::string("cpp_redis::network::redis_connection ") + e.what());
@@ -78,9 +78,9 @@ redis_connection::connect(const std::string& host, std::size_t port,
 
 void
 redis_connection::disconnect(bool wait_for_removal) {
-  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection attempts to disconnect");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection attempts to disconnect");
   m_client->disconnect(wait_for_removal);
-  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection disconnected");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection disconnected");
 }
 
 bool
@@ -103,7 +103,7 @@ redis_connection::send(const std::vector<std::string>& redis_cmd) {
   std::lock_guard<std::mutex> lock(m_buffer_mutex);
 
   m_buffer += build_command(redis_cmd);
-  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection stored new command in the send buffer");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection stored new command in the send buffer");
 
   return *this;
 }
@@ -114,7 +114,7 @@ redis_connection::commit(void) {
   std::lock_guard<std::mutex> lock(m_buffer_mutex);
 
   //! ensure buffer is cleared
-  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection attempts to send pipelined commands");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection attempts to send pipelined commands");
   std::string buffer = std::move(m_buffer);
 
   try {
@@ -127,7 +127,7 @@ redis_connection::commit(void) {
     throw redis_error(e.what());
   }
 
-  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection sent pipelined commands");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection sent pipelined commands");
 
   return *this;
 }
@@ -135,7 +135,7 @@ redis_connection::commit(void) {
 void
 redis_connection::call_disconnection_handler(void) {
   if (m_disconnection_handler) {
-    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection calls disconnection handler");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection calls disconnection handler");
     m_disconnection_handler(*this);
   }
 }
@@ -145,7 +145,7 @@ redis_connection::tcp_client_receive_handler(const tcp_client_iface::read_result
   if (!result.success) { return; }
 
   try {
-    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection receives packet, attempts to build reply");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection receives packet, attempts to build reply");
     m_builder << std::string(result.buffer.begin(), result.buffer.end());
   }
   catch (const redis_error&) {
@@ -155,13 +155,13 @@ redis_connection::tcp_client_receive_handler(const tcp_client_iface::read_result
   }
 
   while (m_builder.reply_available()) {
-    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection reply fully built");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection reply fully built");
 
     auto reply = m_builder.get_front();
     m_builder.pop_front();
 
     if (m_reply_callback) {
-      __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection executes reply callback");
+      __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection executes reply callback");
       m_reply_callback(*this, reply);
     }
   }
@@ -177,10 +177,10 @@ redis_connection::tcp_client_receive_handler(const tcp_client_iface::read_result
 
 void
 redis_connection::tcp_client_disconnection_handler(void) {
-  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection has been disconnected");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection has been disconnected");
 
   if (m_disconnection_handler) {
-    __CPP_REDIS_LOG(info, "cpp_redis::network::redis_connection calls disconnection handler");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::network::redis_connection calls disconnection handler");
     m_disconnection_handler(*this);
   }
 }

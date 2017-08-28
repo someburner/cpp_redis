@@ -27,39 +27,39 @@ namespace cpp_redis {
 
 #ifndef __CPP_REDIS_USE_CUSTOM_TCP_CLIENT
 redis_client::redis_client(void) {
-  __CPP_REDIS_LOG(debug, "cpp_redis::redis_client created");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client created");
 }
 #endif /* __CPP_REDIS_USE_CUSTOM_TCP_CLIENT */
 
 redis_client::redis_client(const std::shared_ptr<network::tcp_client_iface>& tcp_client)
 : m_client(tcp_client) {
-  __CPP_REDIS_LOG(debug, "cpp_redis::redis_client created");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client created");
 }
 
 redis_client::~redis_client(void) {
   m_client.disconnect(true);
-  __CPP_REDIS_LOG(debug, "cpp_redis::redis_client destroyed");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client destroyed");
 }
 
 void
 redis_client::connect(const std::string& host, std::size_t port,
   const disconnection_handler_t& client_disconnection_handler) {
-  __CPP_REDIS_LOG(debug, "cpp_redis::redis_client attempts to connect");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client attempts to connect");
 
   auto disconnection_handler = std::bind(&redis_client::connection_disconnection_handler, this, std::placeholders::_1);
   auto receive_handler       = std::bind(&redis_client::connection_receive_handler, this, std::placeholders::_1, std::placeholders::_2);
   m_client.connect(host, port, disconnection_handler, receive_handler);
 
-  __CPP_REDIS_LOG(info, "cpp_redis::redis_client connected");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client connected");
 
   m_disconnection_handler = client_disconnection_handler;
 }
 
 void
 redis_client::disconnect(bool wait_for_removal) {
-  __CPP_REDIS_LOG(debug, "cpp_redis::redis_client attempts to disconnect");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client attempts to disconnect");
   m_client.disconnect(wait_for_removal);
-  __CPP_REDIS_LOG(info, "cpp_redis::redis_client disconnected");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client disconnected");
 }
 
 bool
@@ -71,10 +71,10 @@ redis_client&
 redis_client::send(const std::vector<std::string>& redis_cmd, const reply_callback_t& callback) {
   std::lock_guard<std::mutex> lock_callback(m_callbacks_mutex);
 
-  __CPP_REDIS_LOG(info, "cpp_redis::redis_client attemps to store new command in the send buffer");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client attemps to store new command in the send buffer");
   m_client.send(redis_cmd);
   m_callbacks.push(callback);
-  __CPP_REDIS_LOG(info, "cpp_redis::redis_client stored new command in the send buffer");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client stored new command in the send buffer");
 
   return *this;
 }
@@ -92,9 +92,9 @@ redis_client::sync_commit(void) {
   try_commit();
 
   std::unique_lock<std::mutex> lock_callback(m_callbacks_mutex);
-  __CPP_REDIS_LOG(debug, "cpp_redis::redis_client waits for callbacks to complete");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client waits for callbacks to complete");
   m_sync_condvar.wait(lock_callback, [=] { return m_callbacks_running == 0 && m_callbacks.empty(); });
-  __CPP_REDIS_LOG(debug, "cpp_redis::redis_client finished to wait for callbacks completion");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client finished to wait for callbacks completion");
 
   return *this;
 }
@@ -108,9 +108,9 @@ redis_client::set_callback_runner(const std::function<void(reply&, const reply_c
 void
 redis_client::try_commit(void) {
   try {
-    __CPP_REDIS_LOG(debug, "cpp_redis::redis_client attempts to send pipelined commands");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client attempts to send pipelined commands");
     m_client.commit();
-    __CPP_REDIS_LOG(info, "cpp_redis::redis_client sent pipelined commands");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client sent pipelined commands");
   }
   catch (const cpp_redis::redis_error& e) {
     __CPP_REDIS_LOG(error, "cpp_redis::redis_client could not send pipelined commands");
@@ -122,7 +122,7 @@ void
 redis_client::connection_receive_handler(network::redis_connection&, reply& reply) {
   reply_callback_t callback = nullptr;
 
-  __CPP_REDIS_LOG(info, "cpp_redis::redis_client received reply");
+  __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client received reply");
   {
     std::lock_guard<std::mutex> lock(m_callbacks_mutex);
     m_callbacks_running += 1;
@@ -134,11 +134,11 @@ redis_client::connection_receive_handler(network::redis_connection&, reply& repl
   }
 
   if (m_callback_runner) {
-    __CPP_REDIS_LOG(debug, "cpp_redis::redis_client executes reply callback through custom before callback handler");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client executes reply callback through custom before callback handler");
     m_callback_runner(reply, callback);
   }
   else if (callback) {
-    __CPP_REDIS_LOG(debug, "cpp_redis::redis_client executes reply callback");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client executes reply callback");
     callback(reply);
   }
 
@@ -162,7 +162,7 @@ redis_client::clear_callbacks(void) {
 void
 redis_client::call_disconnection_handler(void) {
   if (m_disconnection_handler) {
-    __CPP_REDIS_LOG(info, "cpp_redis::redis_client calls disconnection handler");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client calls disconnection handler");
     m_disconnection_handler(*this);
   }
 }

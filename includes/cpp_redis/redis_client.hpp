@@ -84,9 +84,9 @@ public:
     try_commit();
 
     std::unique_lock<std::mutex> lock_callback(m_callbacks_mutex);
-    __CPP_REDIS_LOG(debug, "cpp_redis::redis_client waits for callbacks to complete");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client waits for callbacks to complete");
     m_sync_condvar.wait_for(lock_callback, timeout, [=] { return m_callbacks_running == 0 && m_callbacks.empty(); });
-    __CPP_REDIS_LOG(debug, "cpp_redis::redis_client finished to wait for callbacks completion (or timeout reached)");
+    __CPP_REDIS_LOG(vdebug, "cpp_redis::redis_client finished to wait for callbacks completion (or timeout reached)");
 
     return *this;
   }

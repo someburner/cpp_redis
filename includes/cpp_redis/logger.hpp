@@ -48,10 +48,16 @@ public:
   logger_iface& operator=(const logger_iface&) = default;
 
 public:
-  virtual void debug(const std::string& msg, const std::string& file, std::size_t line) = 0;
-  virtual void info(const std::string& msg, const std::string& file, std::size_t line)  = 0;
-  virtual void warn(const std::string& msg, const std::string& file, std::size_t line)  = 0;
+  /* General Purpose */
   virtual void error(const std::string& msg, const std::string& file, std::size_t line) = 0;
+  virtual void warn(const std::string& msg, const std::string& file, std::size_t line)  = 0;
+  virtual void info(const std::string& msg, const std::string& file, std::size_t line)  = 0;
+  virtual void debug(const std::string& msg, const std::string& file, std::size_t line) = 0;
+  /* Internal use */
+  virtual void vinfo(const std::string& msg, const std::string& file, std::size_t line) = 0;
+  virtual void vdebug(const std::string& msg, const std::string& file, std::size_t line) = 0;
+  /* Everything */
+  virtual void vall(const std::string& msg, const std::string& file, std::size_t line) = 0;
 };
 
 //! default logger class provided by the library
@@ -59,10 +65,13 @@ class logger : public logger_iface {
 public:
   //! log level
   enum class log_level {
-    error = 0,
-    warn  = 1,
-    info  = 2,
-    debug = 3
+    error  = 0,
+    warn   = 1,
+    info   = 2,
+    debug  = 3,
+    vinfo  = 4,
+    vdebug = 5,
+    vall   = 6
   };
 
 public:
@@ -75,10 +84,16 @@ public:
   logger& operator=(const logger&) = default;
 
 public:
-  void debug(const std::string& msg, const std::string& file, std::size_t line);
-  void info(const std::string& msg, const std::string& file, std::size_t line);
-  void warn(const std::string& msg, const std::string& file, std::size_t line);
+   /* General Purpose */
   void error(const std::string& msg, const std::string& file, std::size_t line);
+  void warn(const std::string& msg, const std::string& file, std::size_t line);
+  void info(const std::string& msg, const std::string& file, std::size_t line);
+  void debug(const std::string& msg, const std::string& file, std::size_t line);
+  /* Internal use */
+  void vinfo(const std::string& msg, const std::string& file, std::size_t line);
+  void vdebug(const std::string& msg, const std::string& file, std::size_t line);
+  /* Everything */
+  void vall(const std::string& msg, const std::string& file, std::size_t line);
 
 private:
   log_level m_level;
@@ -89,11 +104,16 @@ private:
 //! by default, not set (no logs)
 extern std::unique_ptr<logger_iface> active_logger;
 
-//! convenience functions used internaly to call the logger
-void debug(const std::string& msg, const std::string& file, std::size_t line);
-void info(const std::string& msg, const std::string& file, std::size_t line);
-void warn(const std::string& msg, const std::string& file, std::size_t line);
+/* General Purpose */
 void error(const std::string& msg, const std::string& file, std::size_t line);
+void warn(const std::string& msg, const std::string& file, std::size_t line);
+void info(const std::string& msg, const std::string& file, std::size_t line);
+void debug(const std::string& msg, const std::string& file, std::size_t line);
+/* Internal use */
+void vinfo(const std::string& msg, const std::string& file, std::size_t line);
+void vdebug(const std::string& msg, const std::string& file, std::size_t line);
+/* Everything */
+void vall(const std::string& msg, const std::string& file, std::size_t line);
 
 //! convenience macro to log with file and line information
 #ifdef __CPP_REDIS_LOGGING_ENABLED
