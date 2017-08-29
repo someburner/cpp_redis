@@ -115,11 +115,18 @@ void vdebug(const std::string& msg, const std::string& file, std::size_t line);
 /* Everything */
 void vall(const std::string& msg, const std::string& file, std::size_t line);
 
-//! convenience macro to log with file and line information
+/* Macros */
 #ifdef __CPP_REDIS_LOGGING_ENABLED
+/* Internal */
 #define __CPP_REDIS_LOG(level, msg) cpp_redis::level(msg, file_name(__FILE__), __LINE__);
+/* External */
+#define RLOG_LFLM(level, file, line, msg) cpp_redis::level(msg, file_name(file), line)
 #else
+/* Internal */
 #define __CPP_REDIS_LOG(level, msg)
+/* External */
+#define RLOG_LFLM(level, file, line, msg)
+
 #endif /* __CPP_REDIS_LOGGING_ENABLED */
 
 } //! cpp_redis
