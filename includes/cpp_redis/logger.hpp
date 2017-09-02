@@ -26,6 +26,7 @@
 #include <mutex>
 #include <string>
 
+namespace cpp_redis {
 /* Hack */
 #include <stdio.h>
 constexpr const char* str_end(const char *str) { return *str ? str_end(str + 1) : str; }
@@ -33,7 +34,6 @@ constexpr bool str_slant(const char *str) { return *str == '/' ? true : (*str ? 
 constexpr const char* r_slant(const char* str) { return *str == '/' ? (str + 1) : r_slant(str - 1); }
 constexpr const char* file_name(const char* str) { return str_slant(str) ? r_slant(str_end(str)) : str; }
 
-namespace cpp_redis {
 
 //! logger_iface
 //! should be inherited by any class intended to be used for logging
@@ -117,16 +117,23 @@ void vall(const std::string& msg, const std::string& file, std::size_t line);
 
 /* Macros */
 #ifdef __CPP_REDIS_LOGGING_ENABLED
-/* Internal */
-#define __CPP_REDIS_LOG(level, msg) cpp_redis::level(msg, file_name(__FILE__), __LINE__);
-/* External */
-#define RLOG_LFLM(level, file, line, msg) cpp_redis::level(msg, file_name(file), line)
+   /* Internal */
+   #ifndef __CPP_REDIS_LOG
+   #define __CPP_REDIS_LOG(level, msg) cpp_redis::level(msg, file_name(__FILE__), __LINE__);
+   #endif
+   /* External */
+   #ifndef RLOG_LFLM
+   #define RLOG_LFLM(level, file, line, msg) cpp_redis::level(msg, file_name(file), line)
+   #endif
 #else
-/* Internal */
-#define __CPP_REDIS_LOG(level, msg)
-/* External */
-#define RLOG_LFLM(level, file, line, msg)
-
+   /* Internal */
+   #ifndef RLOG_LFLM
+   #define __CPP_REDIS_LOG(level, msg)
+   #endif
+   /* External */
+   #ifndef RLOG_LFLM
+   #define RLOG_LFLM(level, file, line, msg)
+   #endif
 #endif /* __CPP_REDIS_LOGGING_ENABLED */
 
 } //! cpp_redis
