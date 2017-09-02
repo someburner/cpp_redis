@@ -1,9 +1,23 @@
-<p align="center">
-   <img src="https://raw.githubusercontent.com/Cylix/cpp_redis/master/assets/images/cpp_redis_logo.jpg"/>
-</p>
+# cpp_redis
 
-# cpp_redis [![Build Status](https://travis-ci.org/Cylix/cpp_redis.svg?branch=master)](https://travis-ci.org/Cylix/cpp_redis)
-`cpp_redis` is a C++11 Asynchronous Multi-Platform Lightweight Redis Client, with support for synchronous operations and pipelining.
+## Installation
+
+```sh
+git submodule init && git submodule update
+mkdir build && cd build
+
+# With logger
+cmake .. -DCMAKE_BUILD_TYPE=Release -DLOGGING_ENABLED=1
+# Without Logger
+cmake .. -DCMAKE_BUILD_TYPE=Release
+
+make
+sudo make install
+
+cd ..
+rm -rf build
+cd ..
+```
 
 ## Requirement
 `cpp_redis` has **no dependency**. Its only requirement is `C++11`.
